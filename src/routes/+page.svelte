@@ -1,17 +1,21 @@
 <script>
     import "../app.css";
-    import image from './interview.png';
+    import interview from './interview.png';
+    import documents from './documents.png';
+    import web from './web.png';
     import {onMount} from 'svelte';
 
-    let icons = [
-        {src: image, text: 'Icon 1 Description', alt: 'Icon 1'},
-        {src: image, text: 'Icon 2 Description', alt: 'Icon 2'},
-        {src: image, text: 'Icon 3 Description', alt: 'Icon 3'},
+    let leftIcons = [
+        {src: web, text: 'We conduct interviews with product users, including software and site reliability engineers', alt: 'Icon 1'},
+        {src: interview, text: 'We conduct interviews with product users, including software and site reliability engineers', alt: 'Icon 2'},
     ];
 
+    let rightIcon = {src: documents, text: 'We collect data from publicly available sources, such as SEC filings.\n', alt: 'Icon 3'};
+
     let containerRef;
-    let iconRefs = [];
-    let rightTableRef;
+    let leftIconRefs = [];
+    let rightIconRef;
+    let ddogCardRef;
     let ovals = [];
     let gsap;
 
@@ -37,10 +41,11 @@
         curvedLines.innerHTML = ''; // Clear existing lines and circles
 
         const containerRect = containerRef.getBoundingClientRect();
-        const rightTableRect = rightTableRef.getBoundingClientRect();
+        const ddogCardRect = ddogCardRef.getBoundingClientRect();
 
-        icons.forEach((_, index) => {
-            const iconElement = iconRefs[index];
+        // Draw paths for left icons
+        leftIcons.forEach((_, index) => {
+            const iconElement = leftIconRefs[index];
             if (!iconElement) return;
 
             const iconRect = iconElement.getBoundingClientRect();
@@ -48,15 +53,15 @@
 
             const startX = iconRect.right - containerRect.left;
             const startY = iconRect.top + iconRect.height / 2 - containerRect.top;
-            const endX = rightTableRect.left - containerRect.left;
-            const endY = rightTableRect.top + rightTableRect.height / 2 - containerRect.top;
+            const endX = ddogCardRect.left - containerRect.left;
+            const endY = ddogCardRect.top + ddogCardRect.height / 2 - containerRect.top;
             const controlX = startX + (endX - startX) * 0.7; // Adjust this value to change the curve
 
             path.setAttribute('d', `M ${startX} ${startY} Q ${controlX} ${startY} ${endX} ${endY}`);
             path.setAttribute('fill', 'none');
             path.setAttribute('stroke', 'black');
             path.setAttribute('stroke-width', '2');
-            path.setAttribute('id', `path${index}`);
+            path.setAttribute('id', `pathLeft${index}`);
 
             curvedLines.appendChild(path);
 
@@ -64,17 +69,46 @@
             oval.setAttribute('rx', '20'); // Horizontal radius
             oval.setAttribute('ry', '3'); // Vertical radius (smaller to make it more oval)
             oval.setAttribute('fill', 'red');
-            oval.setAttribute('id', `oval${index}`);
+            oval.setAttribute('id', `ovalLeft${index}`);
             curvedLines.appendChild(oval);
-            ovals[index] = oval;
+            ovals.push(oval);
         });
+
+        // Draw path for right icon
+        if (rightIconRef) {
+            const rightIconRect = rightIconRef.getBoundingClientRect();
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+
+            const startX = rightIconRect.left - containerRect.left;
+            const startY = rightIconRect.top + rightIconRect.height / 2 - containerRect.top;
+            const endX = ddogCardRect.right - containerRect.left;
+            const endY = ddogCardRect.top + ddogCardRect.height / 2 - containerRect.top;
+            const controlX = startX - (startX - endX) * 0.7; // Adjust this value to change the curve
+
+            path.setAttribute('d', `M ${startX} ${startY} Q ${controlX} ${startY} ${endX} ${endY}`);
+            path.setAttribute('fill', 'none');
+            path.setAttribute('stroke', 'black');
+            path.setAttribute('stroke-width', '2');
+            path.setAttribute('id', 'pathRight');
+
+            curvedLines.appendChild(path);
+
+            const oval = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+            oval.setAttribute('rx', '20'); // Horizontal radius
+            oval.setAttribute('ry', '3'); // Vertical radius (smaller to make it more oval)
+            oval.setAttribute('fill', 'red');
+            oval.setAttribute('id', 'ovalRight');
+            curvedLines.appendChild(oval);
+            ovals.push(oval);
+        }
     }
 
     function animateCircles() {
         if (!gsap) return;
 
         ovals.forEach((oval, index) => {
-            const path = document.getElementById(`path${index}`);
+            const pathId = index < leftIcons.length ? `pathLeft${index}` : 'pathRight';
+            const path = document.getElementById(pathId);
             if (!oval || !path) return;
 
             gsap.to(oval, {
@@ -108,27 +142,37 @@
         Insights into the Public B2B SaaS <span class="text-custom-red">Market.</span>
     </h1>
 
-    <div class="relative flex flex-col md:flex-row justify-between items-center w-full max-w-4xl mx-auto min-h-[400px]" bind:this={containerRef}>
-        <div class="flex flex-col items-center space-y-8 md:space-y-16 mb-8 md:mb-0 z-10">
-            {#each icons as icon, index}
-                <div class="flex flex-col items-center" bind:this={iconRefs[index]}>
-                    <img src={icon.src} alt={icon.alt} class="w-12 h-12 md:w-16 md:h-16 mb-2">
-                    <p class="text-center text-xs md:text-sm">{icon.text}</p>
+    <div class="relative flex justify-between items-center w-full max-w-6xl mx-auto min-h-[400px]"
+         bind:this={containerRef}>
+        <div class="flex flex-col items-center space-y-8 md:space-y-16 z-10">
+            {#each leftIcons as icon, index}
+                <div class="flex flex-col items-center border-2 border-custom-beige rounded-lg p-4"
+                     bind:this={leftIconRefs[index]}>
+                    <img src={icon.src} alt={icon.alt} class="w-16 h-16 md:w-20 md:h-20 mb-2">
+                    <p class="text-center text-xs md:text-sm max-w-[150px]">{icon.text}</p>
                 </div>
             {/each}
         </div>
 
         <svg id="curvedLines" class="absolute top-0 left-0 w-full h-full" style="z-index: 1;"></svg>
 
-        <div class="mt-8 md:mt-0 z-10" bind:this={rightTableRef}>
+        <div class="z-10" bind:this={ddogCardRef}>
             <div class="bg-custom-beige text-[#2B1917] rounded-lg shadow-lg p-6 w-60 text-center">
                 <h2 class="text-2xl font-bold mb-4 text-custom-red">DDOG</h2>
                 <div class="space-y-2">
-                    <p><span class="font-semibold">Competition:</span> 79</p>
-                    <p><span class="font-semibold">Sales Efficiency:</span> 89</p>
-                    <p><span class="font-semibold">R&D Efficiency:</span> 84</p>
-                    <p><span class="font-semibold">Average Score:</span> 86</p>
+                    <p><span class="font-semibold font-Lora">Competition:</span> 79</p>
+                    <p><span class="font-semibold font-Lora">Stickiness:</span> 87</p>
+                    <p><span class="font-semibold font-Lora">Sales Efficiency:</span> 85</p>
+                    <p><span class="font-semibold font-Lora">R&D Efficiency:</span> 84</p>
+                    <p><span class="font-semibold font-Lora">Average Score:</span> 86</p>
                 </div>
+            </div>
+        </div>
+
+        <div class="flex flex-col items-center z-10">
+            <div class="flex flex-col items-center border-2 border-custom-beige rounded-lg p-4" bind:this={rightIconRef}>
+                <img src={rightIcon.src} alt={rightIcon.alt} class="w-16 h-16 md:w-20 md:h-20 mb-2">
+                <p class="text-center text-xs md:text-sm max-w-[150px]">{rightIcon.text}</p>
             </div>
         </div>
     </div>
