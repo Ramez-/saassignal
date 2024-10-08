@@ -6,7 +6,10 @@ export default {
             colors: {
                 'custom-red': '#FF4B2B',
                 'custom-beige': '#F2E3DB',
-            }
+            },
+            fontFamily: {
+                Lora: ["Lora", "serif"],
+            },
         },
         plugins: [],
     }
